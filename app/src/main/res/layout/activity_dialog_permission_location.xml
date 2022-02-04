@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    tools:context=".DialogPermissionLocationActivity">
+
+    <Button
+        android:id="@+id/btnPerkiraanLokasi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Message Dialog Permission Perkiraan Lokasi"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnAkuratLokasi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Message Dialog Permission Akurat Lokasi"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnMultipleLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Message Multiple Request Location"
+        android:textAllCaps="false" />
+
+</LinearLayout>
