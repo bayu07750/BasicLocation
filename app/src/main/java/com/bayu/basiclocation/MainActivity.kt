@@ -17,5 +17,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnTestPermissionLocation.setOnClickListener {
             Intent(this, DialogPermissionLocationActivity::class.java).also { startActivity(it) }
         }
+
+        binding.btnLocaationMyPhone.setOnClickListener {
+            Intent(this, LocationPhoneActivity::class.java).also { startActivity(it) }
+        }
     }
 }

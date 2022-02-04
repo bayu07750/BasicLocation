@@ -5,20 +5,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    tools:context=".MainActivity">
+    tools:context=".LocationPhoneActivity">
 
-    <Button
-        android:id="@+id/btnTestPermissionLocation"
+    <TextView
+        android:id="@+id/tvResult"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Test Dialog Permission Location"
-        android:textAllCaps="false" />
+        android:layout_marginBottom="16dp"
+        android:text="My Location" />
 
     <Button
-        android:id="@+id/btnLocaationMyPhone"
+        android:id="@+id/btnGetNow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Location My Phone"
+        android:text="Get Now"
         android:textAllCaps="false" />
 
 </LinearLayout>
