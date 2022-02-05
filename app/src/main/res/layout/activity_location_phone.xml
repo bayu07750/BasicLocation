@@ -15,10 +15,10 @@
         android:text="My Location" />
 
     <Button
-        android:id="@+id/btnGetNow"
+        android:id="@+id/btnGetLastLocationMyPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Now"
+        android:text="Get Last Location My Phone"
         android:textAllCaps="false" />
 
 </LinearLayout>

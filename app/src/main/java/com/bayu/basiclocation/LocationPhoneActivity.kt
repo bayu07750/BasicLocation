@@ -39,7 +39,7 @@ class LocationPhoneActivity : AppCompatActivity() {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        binding.btnGetNow.setOnClickListener {
+        binding.btnGetLastLocationMyPhone.setOnClickListener {
             if (hasPermissionLocation()) {
                 fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {
