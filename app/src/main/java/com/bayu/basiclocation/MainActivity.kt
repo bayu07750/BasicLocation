@@ -21,5 +21,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnLocaationMyPhone.setOnClickListener {
             Intent(this, LocationLastPhoneActivity::class.java).also { startActivity(it) }
         }
+
+        binding.btnGetCurrentLocation.setOnClickListener {
+            Intent(this, LocationCurrentPhoneActivity::class.java).also { startActivity(it) }
+        }
     }
 }
