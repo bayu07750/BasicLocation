@@ -14,7 +14,7 @@ import com.bayu.basiclocation.databinding.ActivityLocationPhoneBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-class LocationPhoneActivity : AppCompatActivity() {
+class LocationLastPhoneActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLocationPhoneBinding
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient

@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BasicLocation">
         <activity
-            android:name=".LocationPhoneActivity"
+            android:name=".LocationLastPhoneActivity"
             android:exported="false" />
         <activity
             android:name=".DialogPermissionLocationActivity"

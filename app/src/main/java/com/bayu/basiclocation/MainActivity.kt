@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnLocaationMyPhone.setOnClickListener {
-            Intent(this, LocationPhoneActivity::class.java).also { startActivity(it) }
+            Intent(this, LocationLastPhoneActivity::class.java).also { startActivity(it) }
         }
     }
 }
