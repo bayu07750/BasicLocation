@@ -3,22 +3,24 @@ package com.bayu.location.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Geocoder
+import android.content.IntentSender
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bayu.location.BuildConfig
 import com.bayu.location.databinding.FragmentCurrentLocationBinding
-import com.bayu.location.extension.hasPermission
-import com.bayu.location.extension.shouldShowRationale
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 
 class CurrentLocationFragment : Fragment() {
@@ -26,26 +28,29 @@ class CurrentLocationFragment : Fragment() {
     private var _binding: FragmentCurrentLocationBinding? = null
     private val binding get() = _binding!!
 
-    private val fusedLocationProviderClient by lazy {
+    private val fusedLocationProviderClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireContext())
     }
 
-    private var cancellationTokenSource = CancellationTokenSource()
+    private var currentLocation: Location? = null
+
+    private lateinit var locationCallback: LocationCallback
 
     private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val isGranted = permissions.entries.all { it.value }
         if (isGranted) {
             Snackbar.make(
                 binding.root,
                 "Permission Granted",
-                Snackbar.LENGTH_SHORT
+                Snackbar.LENGTH_LONG
             ).show()
         } else {
             Snackbar.make(
                 binding.root,
                 "Permission Danied",
-                Snackbar.LENGTH_SHORT
+                Snackbar.LENGTH_LONG
             )
                 .setAction("Go Setting") {
                     val uri = Uri.fromParts(
@@ -53,87 +58,135 @@ class CurrentLocationFragment : Fragment() {
                         BuildConfig.APPLICATION_ID,
                         null
                     )
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = uri
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    startActivity(intent)
+                        data = uri
+                    }.also { startActivity(it) }
                 }
                 .show()
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                Log.d(
+                    "uyab",
+                    "getLastLocation: ${locationResult.lastLocation.latitude} - ${locationResult.lastLocation.longitude}"
+                )
+                showMessage("${locationResult.lastLocation.latitude} - ${locationResult.lastLocation.longitude}")
+                currentLocation = locationResult.lastLocation
+            }
+        }
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCurrentLocationBinding.inflate(layoutInflater)
         return binding.root
     }
 
+    override fun onPause() {
+        super.onPause()
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnLocation.setOnClickListener {
-            if (!requireContext().hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                requestPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        binding.btnLastLocation.setOnClickListener {
+            if (!hasPermission()) {
+                requestPermission()
             } else {
-                getCurrentLocation()
+                getLastLocation()
             }
         }
-    }
 
-    private fun requestPermission(permission: String) {
-        val launchPermission = {
-            permissionLauncher.launch(permission)
-        }
-        if (requireActivity().shouldShowRationale(permission)) {
-            Snackbar.make(
-                binding.root,
-                "Kami butuh lokasi anda untuk menggunakan layanan ini",
-                Snackbar.LENGTH_SHORT
-            )
-                .setAction("Iya") {
-                    launchPermission()
-                }
-                .show()
-        } else {
-            launchPermission()
+        binding.btnCurrentLocation.setOnClickListener {
+            if (!hasPermission()) {
+                requestPermission()
+            } else {
+                getUpdatedLocation()
+            }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun getCurrentLocation() {
-        val currentLocationTask = fusedLocationProviderClient.getCurrentLocation(
-            LocationRequest.PRIORITY_HIGH_ACCURACY,
-            cancellationTokenSource.token
-        )
+    private fun getUpdatedLocation() {
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
-        currentLocationTask.addOnCompleteListener {
-            val result = if (it.isSuccessful && it.result != null) {
-                val location = it.result
-                val geocoder = Geocoder(requireContext()).getFromLocation(
-                    location.latitude,
-                    location.longitude,
-                    1
-                )
-                val address = geocoder.first()
-                "Berhasil mendapatkan Lokasi: ${address.countryName}/${address.adminArea}/${address.subAdminArea}/${address.locality}/${address.subLocality}/${address.thoroughfare}/${address.subThoroughfare}"
-            } else {
-                "Gagal mendapatkan Lokasi: ${it.exception?.message}"
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+
+        val client = LocationServices.getSettingsClient(requireContext())
+        val task = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+            fusedLocationProviderClient.requestLocationUpdates(
+                locationRequest, locationCallback, Looper.getMainLooper()
+            )
+        }
+
+        task.addOnFailureListener { e ->
+            if (e is ResolvableApiException) {
+                try {
+                    e.startResolutionForResult(
+                        requireActivity(),
+                        100
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
             }
-
-            binding.tvTitlePage.text = result
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        cancellationTokenSource.cancel()
+    @SuppressLint("MissingPermission")
+    private fun getLastLocation() {
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                Log.d("uyab", "getLastLocation: ${location.latitude} - ${location.longitude}")
+                showMessage("${location.latitude} - ${location.longitude}")
+                currentLocation = location
+            } else {
+                showMessage("Null")
+                Log.d("uyab", "getLastLocation: Null")
+            }
+        }
+    }
+
+    private fun showMessage(message: String) {
+        binding.tvTitlePage.text = message
+    }
+
+    private fun requestPermission() {
+        permissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        )
+    }
+
+    private fun hasPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
 }

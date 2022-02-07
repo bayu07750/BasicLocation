@@ -17,11 +17,18 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
 
     <Button
-        android:id="@+id/btnLocation"
+        android:id="@+id/btnLastLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAllCaps="false"
-        android:text="Lokasi Anda" />
+        android:text="Lokasi terakhir Anda"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/btnCurrentLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lokasi Anda Sekarang"
+        android:textAllCaps="false" />
 
 
 </LinearLayout>
