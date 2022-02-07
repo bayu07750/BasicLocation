@@ -51,15 +51,21 @@ class HomeFragment : Fragment() {
 
         binding.btnLastLocation.setOnClickListener {
             if (!requireContext().hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                requestPermission()
+                requestPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+            } else {
+                getLastLocation()
+            }
+        }
+        binding.btnFindLocation.setOnClickListener {
+            if (!requireContext().hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                requestPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             } else {
                 getLastLocation()
             }
         }
     }
 
-    private fun requestPermission() {
-        val permission = Manifest.permission.ACCESS_COARSE_LOCATION
+    private fun requestPermission(permission: String) {
         val launchPermission = {
             locationLauncher.launch(permission)
         }
