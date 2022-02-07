@@ -30,4 +30,11 @@
         android:text="Akurat Lokasi terakhir saya (Last Location)"
         android:textAllCaps="false" />
 
+    <Button
+        android:id="@+id/btnCurrentLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lokasi Saat ini (Current Location)"
+        android:textAllCaps="false" />
+
 </androidx.appcompat.widget.LinearLayoutCompat>

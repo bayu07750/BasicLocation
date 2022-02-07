@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.bayu.location.R
 import com.bayu.location.databinding.FragmentHomeBinding
 import com.bayu.location.extension.hasPermission
 import com.bayu.location.extension.shouldShowRationale
@@ -62,6 +64,9 @@ class HomeFragment : Fragment() {
             } else {
                 getLastLocation()
             }
+        }
+        binding.btnCurrentLocation.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_currentLocationFragment)
         }
     }
 
