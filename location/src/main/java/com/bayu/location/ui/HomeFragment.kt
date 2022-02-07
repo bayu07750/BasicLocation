@@ -2,7 +2,6 @@ package com.bayu.location.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,9 +10,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bayu.location.databinding.FragmentHomeBinding
+import com.bayu.location.extension.hasPermission
+import com.bayu.location.extension.shouldShowRationale
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
             LocationServices.getFusedLocationProviderClient(requireContext())
 
         binding.btnLastLocation.setOnClickListener {
-            if (!hasPermission()) {
+            if (!requireContext().hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 requestPermission()
             } else {
                 getLastLocation()
@@ -59,20 +59,20 @@ class HomeFragment : Fragment() {
     }
 
     private fun requestPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                requireActivity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        ) {
+        val permission = Manifest.permission.ACCESS_COARSE_LOCATION
+        val launchPermission = {
+            locationLauncher.launch(permission)
+        }
+        if (requireActivity().shouldShowRationale(permission)) {
             showDialog(
                 title = "Konfirmasi!",
                 message = "Untuk menggunakan layanan location kami, anda harus mengijinkan permission location\nTerima Kasih",
                 onPositiveButtonClicked = {
-                    locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    launchPermission()
                 }
             )
         } else {
-            locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            launchPermission()
         }
     }
 
@@ -150,13 +150,6 @@ class HomeFragment : Fragment() {
 
     private fun showMessage(msg: String) {
         binding.tvTitlePage.text = msg
-    }
-
-    private fun hasPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
-            requireContext(),
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onDestroyView() {
