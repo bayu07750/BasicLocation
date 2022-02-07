@@ -20,14 +20,14 @@
         android:id="@+id/btnLastLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Perkiraan Lokasi terakhir saya"
+        android:text="Perkiraan Lokasi terakhir saya (Last Location)"
         android:textAllCaps="false" />
 
     <Button
         android:id="@+id/btnFindLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Akurat Lokasi terakhir saya"
+        android:text="Akurat Lokasi terakhir saya (Last Location)"
         android:textAllCaps="false" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
